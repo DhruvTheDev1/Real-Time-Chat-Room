@@ -28,7 +28,7 @@ public class WebSocketEventListener {
       log.info("User connected: {}", username);
       ChatMessage chatMessage = ChatMessage.builder()
           .messageType(ChatMessage.MessageType.JOIN)
-          .sender(username)
+          .user(username)
           .build();
       messagingTemplate.convertAndSend("/topic/public", chatMessage);
     }
@@ -44,7 +44,7 @@ public class WebSocketEventListener {
       log.info("User disconnected: {}", username);
       ChatMessage chatMessage = ChatMessage.builder()
           .messageType(ChatMessage.MessageType.LEAVE)
-          .sender(username)
+          .user(username)
           .build();
       messagingTemplate.convertAndSend("/topic/public", chatMessage);
     }

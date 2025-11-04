@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 @Builder
 
 public class ChatMessage {
-  private String sender;
+  private String user; // sender
+  private String message; // the content being sent
   private MessageType messageType;
 
   public enum MessageType {
