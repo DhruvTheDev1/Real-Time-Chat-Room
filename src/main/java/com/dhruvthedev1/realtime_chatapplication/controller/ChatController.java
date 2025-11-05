@@ -20,7 +20,7 @@ public class ChatController {
   @MessageMapping("/chat.addUser")
   @SendTo("/topic/public")
   public ChatMessage addUser(@Payload ChatMessage message, SimpMessageHeaderAccessor headerAccessor) {
-    headerAccessor.getSessionAttributes().put("user", message.getUser());
+    headerAccessor.getSessionAttributes().put("username", message.getUser());
     return message;
   }
 

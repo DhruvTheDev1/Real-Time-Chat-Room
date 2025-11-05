@@ -1,0 +1,27 @@
+#chat {
+  width: 80%;
+  margin: auto;
+}
+
+#chat-messages {
+  border: 1px solid #ddd;
+  padding: 10px;
+  height: 400px;
+  overflow-y: auto;
+}
+
+#message-input {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+input[type="text"] {
+  width: 80%;
+  padding: 10px;
+}
+
+button {
+  padding: 10px;
+  cursor: pointer;
+}
