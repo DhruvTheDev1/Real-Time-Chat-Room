@@ -1,0 +1,70 @@
+let stompClient = null;
+const username = localStorage.getItem("username");  // Gets username from localstorage
+
+// Connects to websocket
+function connect() {
+    const socket = new SockJS('/ws');
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, function (frame) {
+        console.log('Connected: ' + frame);
+        // receive messages
+        stompClient.subscribe('/topic/public', function (messageOutput) {
+            showMessage(JSON.parse(messageOutput.body));  // Show messages
+        });
+
+        // Sends message when a user joins chat
+        sendJoinMessage();
+    });
+}
+
+// Send message to the server
+function sendMessage() {
+    const messageContent = document.getElementById('message').value.trim();
+    if (messageContent && stompClient) {
+        const chatMessage = {
+            user: username,
+            message: messageContent,
+            messageType: 'CHAT' 
+        };
+        stompClient.send("/app/chat", {}, JSON.stringify(chatMessage)); 
+        document.getElementById('message').value = '';  
+    }
+}
+
+// Send message when a user enters the cat
+function sendJoinMessage() {
+    const joinMessage = {
+        user: username, 
+        message: '', 
+        messageType: 'JOIN'
+    };
+    stompClient.send("/app/chat.addUser", {}, JSON.stringify(joinMessage));
+}
+
+// Show message in chatbox
+function showMessage(message) {
+    const messageBox = document.getElementById('chat-messages');
+    const newMessage = document.createElement('div');
+
+    if (message.messageType === 'JOIN') {
+        newMessage.textContent = `${message.user} has joined the chat.`;
+    } else if (message.messageType === 'LEAVE') {
+        newMessage.textContent = `${message.user} has left the chat.`;
+    } else {
+        newMessage.innerHTML = `<strong>${message.user}</strong>: ${message.message}`;
+    }
+
+    messageBox.appendChild(newMessage);
+    messageBox.scrollTop = messageBox.scrollHeight;
+}
+
+document.getElementById("send").addEventListener("click", sendMessage);
+
+document.getElementById("message").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") { 
+        sendMessage(); 
+        event.preventDefault();
+    }
+});
+
+window.onload = connect;
