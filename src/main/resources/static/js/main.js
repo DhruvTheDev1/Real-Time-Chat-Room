@@ -11,6 +11,12 @@ function connect() {
         stompClient.subscribe('/topic/public', function (messageOutput) {
             showMessage(JSON.parse(messageOutput.body));  // Show messages
         });
+        
+         // user count
+        stompClient.subscribe('/topic/userCount', function (userCountOutput) {
+                const userCount = parseInt(userCountOutput.body, 10);
+            updateUserCount(userCount);  // Updates active user
+        });
 
         // Sends message when a user joins chat
         sendJoinMessage();
@@ -58,6 +64,13 @@ function showMessage(message) {
     messageBox.scrollTop = messageBox.scrollHeight;
 }
 
+// updates userCount
+function updateUserCount(userCount) {
+    console.log("User count received:", userCount);  // Debugging line
+    const userCountElement = document.getElementById('active-users');
+    userCountElement.textContent = userCount; 
+}
+
 document.getElementById("send").addEventListener("click", sendMessage);
 
 document.getElementById("message").addEventListener("keypress", function(event) {
@@ -66,5 +79,7 @@ document.getElementById("message").addEventListener("keypress", function(event) 
         event.preventDefault();
     }
 });
+
+
 
 window.onload = connect;
