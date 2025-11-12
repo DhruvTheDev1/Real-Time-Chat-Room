@@ -1,25 +1,24 @@
 let stompClient = null;
-const username = localStorage.getItem("username");  // Gets username from localstorage
+const username = localStorage.getItem("username");  // Gets username from localStorage
+console.log("Username retrieved from localStorage:", username); // debbuging line
 
 // Connects to websocket
 function connect() {
     const socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
-    stompClient.connect({}, function (frame) {
+    stompClient.connect({"username": username}, function (frame) {  
         console.log('Connected: ' + frame);
-        // receive messages
+        
+        // Receive messages
         stompClient.subscribe('/topic/public', function (messageOutput) {
             showMessage(JSON.parse(messageOutput.body));  // Show messages
         });
         
-         // user count
+        // User count
         stompClient.subscribe('/topic/userCount', function (userCountOutput) {
-                const userCount = parseInt(userCountOutput.body, 10);
-            updateUserCount(userCount);  // Updates active user
+            const userCount = parseInt(userCountOutput.body, 10);
+            updateUserCount(userCount);  // Updates active user count
         });
-
-        // Sends message when a user joins chat
-        sendJoinMessage();
     });
 }
 
@@ -35,16 +34,6 @@ function sendMessage() {
         stompClient.send("/app/chat", {}, JSON.stringify(chatMessage)); 
         document.getElementById('message').value = '';  
     }
-}
-
-// Send message when a user enters the cat
-function sendJoinMessage() {
-    const joinMessage = {
-        user: username, 
-        message: '', 
-        messageType: 'JOIN'
-    };
-    stompClient.send("/app/chat.addUser", {}, JSON.stringify(joinMessage));
 }
 
 // Show message in chatbox
@@ -64,7 +53,7 @@ function showMessage(message) {
     messageBox.scrollTop = messageBox.scrollHeight;
 }
 
-// updates userCount
+// Updates user count
 function updateUserCount(userCount) {
     console.log("User count received:", userCount);  // Debugging line
     const userCountElement = document.getElementById('active-users');
@@ -79,7 +68,5 @@ document.getElementById("message").addEventListener("keypress", function(event) 
         event.preventDefault();
     }
 });
-
-
 
 window.onload = connect;

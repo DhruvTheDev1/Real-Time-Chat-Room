@@ -19,60 +19,62 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-
 public class WebSocketEventListener {
-  private final SimpMessageSendingOperations messagingTemplate;
-  private Set<String> onlineUsers = Collections.synchronizedSet(new HashSet<>()); // stores active users
+    private final SimpMessageSendingOperations messagingTemplate;
+    private Set<String> onlineUsers = Collections.synchronizedSet(new HashSet<>()); // Stores active users
 
+    // When a user joins
+    @EventListener
+    public void handleWebSocketConnectListener(SessionConnectEvent event) {
+        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+        
+        String username = (String) headerAccessor.getNativeHeader("username").get(0); 
 
-  // when a user joins
-  @EventListener
-  public void handleWebSocketConnectListener(SessionConnectEvent event) {
-    StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-    String username = (String) headerAccessor.getSessionAttributes().get("username");
-    if (username != null) {
-      log.info("User connected: {}", username);
+        if (username != null) {
+            // Set username
+            headerAccessor.getSessionAttributes().put("username", username);
+            log.info("User connected: {}", username);
 
-      // add user to online count
-      onlineUsers.add(username);
-      sendActiveUserList();
+            onlineUsers.add(username);
+            sendActiveUserList();
 
-      ChatMessage chatMessage = ChatMessage.builder()
-          .messageType(ChatMessage.MessageType.JOIN)
-          .user(username)
-          .build();
-      messagingTemplate.convertAndSend("/topic/public", chatMessage);
-
+            // Send join message
+            ChatMessage chatMessage = ChatMessage.builder()
+                .messageType(ChatMessage.MessageType.JOIN)
+                .user(username)
+                .build();
+            messagingTemplate.convertAndSend("/topic/public", chatMessage);
+        } else {
+            log.error("No username found in connection headers.");
+        }
     }
-  }
 
-  // when a user disconnects
-  @EventListener
-  public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
-    StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-    String username = (String) headerAccessor.getSessionAttributes().get("username");
+    // When a user disconnects
+    @EventListener
+    public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
+        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+        String username = (String) headerAccessor.getSessionAttributes().get("username");
 
-    if (username != null) {
-      log.info("User disconnected: {}", username);
+        if (username != null) {
+            log.info("User disconnected: {}", username);
 
-      // remove user from count
-      onlineUsers.remove(username);
-        sendActiveUserList();
+            onlineUsers.remove(username);
+            sendActiveUserList();
 
-      ChatMessage chatMessage = ChatMessage.builder()
-          .messageType(ChatMessage.MessageType.LEAVE)
-          .user(username)
-          .build();
-      messagingTemplate.convertAndSend("/topic/public", chatMessage);
-
+            // Send disconnect message
+            ChatMessage chatMessage = ChatMessage.builder()
+                .messageType(ChatMessage.MessageType.LEAVE)
+                .user(username)
+                .build();
+            messagingTemplate.convertAndSend("/topic/public", chatMessage);
+        } else {
+            log.error("No username found in session during disconnect.");
+        }
     }
-  }
 
-  private void sendActiveUserList() {
-    int userCount = onlineUsers.size();
-    log.info("Current Users: {}", userCount);
-    messagingTemplate.convertAndSend("/topic/userCount", userCount);
-  }
+    private void sendActiveUserList() {
+        int userCount = onlineUsers.size();
+        log.info("Current Users: {}", userCount);
+        messagingTemplate.convertAndSend("/topic/userCount", userCount);
+    }
 }
-
-

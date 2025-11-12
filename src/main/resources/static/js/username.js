@@ -1,11 +1,15 @@
 document.getElementById("usernameForm").addEventListener("submit", function(event) {
-    event.preventDefault(); 
+    event.preventDefault();  // Prevent form from submitting and reloading the page
 
     const username = document.getElementById("usernameInput").value.trim();
+    
     if (username) {
+        // Save the username in localStorage
         localStorage.setItem("username", username);
-        window.location.href = "chatroom.html";  
+        
+        // Redirect to chatroom page
+        window.location.href = "chatroom.html"; 
     } else {
-        alert("Please enter a username.");
+        alert("Please enter a valid username.");
     }
 });
