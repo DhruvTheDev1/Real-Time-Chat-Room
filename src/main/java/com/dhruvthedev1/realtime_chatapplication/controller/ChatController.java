@@ -20,13 +20,16 @@ public class ChatController {
   @MessageMapping("/chat.addUser")
   @SendTo("/topic/public")
   public ChatMessage addUser(@Payload ChatMessage message, SimpMessageHeaderAccessor headerAccessor) {
-        System.out.println("Session attributes before setting username: " + headerAccessor.getSessionAttributes());
-
-
+    System.out.println("Session attributes before setting username: " + headerAccessor.getSessionAttributes());
     headerAccessor.getSessionAttributes().put("username", message.getUser());
+    // System.out.println("Setting username: " + message.getUser()); // log
+    return message;
+  }
 
-        System.out.println("Setting username: " + message.getUser()); // Log 
-
+  @MessageMapping("/chat.typing")
+  @SendTo("/topic/public")
+  public ChatMessage handleTypingEvent(@Payload ChatMessage message) {
+    message.setMessageType(ChatMessage.MessageType.TYPING);
     return message;
   }
 
