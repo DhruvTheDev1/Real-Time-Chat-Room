@@ -27,7 +27,7 @@ public class ChatController {
   }
 
   @MessageMapping("/chat.typing")
-  @SendTo("/topic/public")
+  @SendTo("/topic/typing")
   public ChatMessage handleTypingEvent(@Payload ChatMessage message) {
     message.setMessageType(ChatMessage.MessageType.TYPING);
     return message;

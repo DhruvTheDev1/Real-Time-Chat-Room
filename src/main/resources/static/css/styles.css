@@ -25,3 +25,11 @@ button {
   padding: 10px;
   cursor: pointer;
 }
+
+#typing-indicator {
+  display: none;
+  font-style: italic;
+  color: gray;
+  margin-top: 10px;
+  font-size: 14px;
+}

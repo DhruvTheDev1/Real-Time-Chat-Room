@@ -19,6 +19,13 @@ function connect() {
             const userCount = parseInt(userCountOutput.body, 10);
             updateUserCount(userCount);  // Updates active user count
         });
+
+          // Typing event subscription
+        stompClient.subscribe('/topic/typing', function (typingOutput) {
+            const typingMessage = JSON.parse(typingOutput.body);
+            showTypingIndicator(typingMessage);  // Show typing indicator
+        });
+        
     });
 }
 
@@ -60,13 +67,46 @@ function updateUserCount(userCount) {
     userCountElement.textContent = userCount; 
 }
 
+// show message being typed
+function showTypingIndicator(typingMessage) {
+    const typingIndicator = document.getElementById('typing-indicator');
+    if (typingMessage.user !== username) { 
+        typingIndicator.textContent = `Someone is typing...`;
+        typingIndicator.style.display = 'block';
+
+        // hides typing indicator after 3 seconds
+        setTimeout(() => {
+            typingIndicator.style.display = 'none';
+        }, 3000);
+    }
+}
+
+// sends typing event
+function sendTypingEvent() {
+    const typingMessage = {
+        user: username,
+        message: '',
+        messageType: 'TYPING'
+    };
+    stompClient.send("/app/chat.typing", {}, JSON.stringify(typingMessage));
+}
+
 document.getElementById("send").addEventListener("click", sendMessage);
 
-document.getElementById("message").addEventListener("keypress", function(event) {
+document.getElementById("message").addEventListener("keydown", function(event) {
     if (event.key === "Enter") { 
         sendMessage(); 
         event.preventDefault();
     }
+}); 
+
+// sends typing event on any input
+document.getElementById("message").addEventListener("input", function(event) {
+    sendTypingEvent();  
+
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(function() {
+    }, 2000);
 });
 
 window.onload = connect;
