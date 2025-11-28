@@ -6,26 +6,26 @@ console.log("Username retrieved from localStorage:", username); // debbuging lin
 function connect() {
     const socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
-    stompClient.connect({"username": username}, function (frame) {  
+    stompClient.connect({ "username": username }, function (frame) {
         console.log('Connected: ' + frame);
-        
+
         // Receive messages
         stompClient.subscribe('/topic/public', function (messageOutput) {
             showMessage(JSON.parse(messageOutput.body));  // Show messages
         });
-        
+
         // User count
         stompClient.subscribe('/topic/userCount', function (userCountOutput) {
             const userCount = parseInt(userCountOutput.body, 10);
             updateUserCount(userCount);  // Updates active user count
         });
 
-          // Typing event subscription
+        // Typing event subscription
         stompClient.subscribe('/topic/typing', function (typingOutput) {
             const typingMessage = JSON.parse(typingOutput.body);
             showTypingIndicator(typingMessage);  // Show typing indicator
         });
-        
+
     });
 }
 
@@ -36,15 +36,17 @@ function sendMessage() {
         const chatMessage = {
             user: username,
             message: messageContent,
-            messageType: 'CHAT' 
+            messageType: 'CHAT',
         };
-        stompClient.send("/app/chat", {}, JSON.stringify(chatMessage)); 
-        document.getElementById('message').value = '';  
+
+        stompClient.send("/app/chat", {}, JSON.stringify(chatMessage));
+        document.getElementById('message').value = '';
     }
 }
 
 // Show message in chatbox
 function showMessage(message) {
+
     const messageBox = document.getElementById('chat-messages');
     const newMessage = document.createElement('div');
 
@@ -53,7 +55,9 @@ function showMessage(message) {
     } else if (message.messageType === 'LEAVE') {
         newMessage.textContent = `${message.user} has left the chat.`;
     } else {
-        newMessage.innerHTML = `<strong>${message.user}</strong>: ${message.message}`;
+        const timestamp = new Date().toLocaleTimeString();
+        newMessage.innerHTML = `<strong>${message.user}</strong>: ${message.message}
+        <span class="timestamp">${timestamp}</span>`;
     }
 
     messageBox.appendChild(newMessage);
@@ -64,13 +68,13 @@ function showMessage(message) {
 function updateUserCount(userCount) {
     console.log("User count received:", userCount);  // Debugging line
     const userCountElement = document.getElementById('active-users');
-    userCountElement.textContent = userCount; 
+    userCountElement.textContent = userCount;
 }
 
 // show message being typed
 function showTypingIndicator(typingMessage) {
     const typingIndicator = document.getElementById('typing-indicator');
-    if (typingMessage.user !== username) { 
+    if (typingMessage.user !== username) {
         typingIndicator.textContent = `Someone is typing...`;
         typingIndicator.style.display = 'block';
 
@@ -93,19 +97,19 @@ function sendTypingEvent() {
 
 document.getElementById("send").addEventListener("click", sendMessage);
 
-document.getElementById("message").addEventListener("keydown", function(event) {
-    if (event.key === "Enter") { 
-        sendMessage(); 
+document.getElementById("message").addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+        sendMessage();
         event.preventDefault();
     }
-}); 
+});
 
 // sends typing event on any input
-document.getElementById("message").addEventListener("input", function(event) {
-    sendTypingEvent();  
+document.getElementById("message").addEventListener("input", function (event) {
+    sendTypingEvent();
 
     clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(function() {
+    typingTimeout = setTimeout(function () {
     }, 2000);
 });
 

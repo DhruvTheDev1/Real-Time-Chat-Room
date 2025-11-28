@@ -33,3 +33,17 @@ button {
   margin-top: 10px;
   font-size: 14px;
 }
+
+#chat-messages div {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.timestamp {
+  font-size: 12px;
+  color: gray;
+  margin-left: auto;
+
+}
