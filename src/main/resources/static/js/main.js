@@ -1,4 +1,5 @@
 let stompClient = null;
+let typingTimeout;
 const username = localStorage.getItem("username");  // Gets username from localStorage
 console.log("Username retrieved from localStorage:", username); // debbuging line
 
