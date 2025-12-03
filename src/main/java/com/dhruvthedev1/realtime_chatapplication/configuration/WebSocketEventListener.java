@@ -27,8 +27,8 @@ public class WebSocketEventListener {
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        
-        String username = (String) headerAccessor.getNativeHeader("username").get(0); 
+
+        String username = (String) headerAccessor.getNativeHeader("username").get(0);
 
         if (username != null) {
             // Set username
@@ -40,9 +40,9 @@ public class WebSocketEventListener {
 
             // Send join message
             ChatMessage chatMessage = ChatMessage.builder()
-                .messageType(ChatMessage.MessageType.JOIN)
-                .user(username)
-                .build();
+                    .messageType(ChatMessage.MessageType.JOIN)
+                    .user(username)
+                    .build();
             messagingTemplate.convertAndSend("/topic/public", chatMessage);
         } else {
             log.error("No username found in connection headers.");
@@ -63,9 +63,9 @@ public class WebSocketEventListener {
 
             // Send disconnect message
             ChatMessage chatMessage = ChatMessage.builder()
-                .messageType(ChatMessage.MessageType.LEAVE)
-                .user(username)
-                .build();
+                    .messageType(ChatMessage.MessageType.LEAVE)
+                    .user(username)
+                    .build();
             messagingTemplate.convertAndSend("/topic/public", chatMessage);
         } else {
             log.error("No username found in session during disconnect.");
@@ -76,5 +76,9 @@ public class WebSocketEventListener {
         int userCount = onlineUsers.size();
         log.info("Current Users: {}", userCount);
         messagingTemplate.convertAndSend("/topic/userCount", userCount);
+    }
+
+    public int getOnlineUsersCount() {
+        return onlineUsers.size();
     }
 }

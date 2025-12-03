@@ -10,15 +10,15 @@ function connect() {
     stompClient.connect({ "username": username }, function (frame) {
         console.log('Connected: ' + frame);
 
+         // subscribers to user count right away when connected
+        stompClient.subscribe('/topic/userCount', function (userCountOutput) {
+            const userCount = parseInt(userCountOutput.body, 10);
+            updateUserCount(userCount);  // Update user count
+        });
+
         // Receive messages
         stompClient.subscribe('/topic/public', function (messageOutput) {
             showMessage(JSON.parse(messageOutput.body));  // Show messages
-        });
-
-        // User count
-        stompClient.subscribe('/topic/userCount', function (userCountOutput) {
-            const userCount = parseInt(userCountOutput.body, 10);
-            updateUserCount(userCount);  // Updates active user count
         });
 
         // Typing event subscription
@@ -26,6 +26,11 @@ function connect() {
             const typingMessage = JSON.parse(typingOutput.body);
             showTypingIndicator(typingMessage);  // Show typing indicator
         });
+
+        // forces the bacend to send current user count as soon as a user connects
+        setTimeout(() => {
+            stompClient.send("/app/requestUserCount", {}, JSON.stringify({}));
+        }, 1000); // delay to ensure websocket is ready before requesting user count
 
     });
 }
