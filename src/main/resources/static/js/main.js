@@ -10,7 +10,7 @@ function connect() {
     stompClient.connect({ "username": username }, function (frame) {
         console.log('Connected: ' + frame);
 
-         // subscribers to user count right away when connected
+         // subscribes to user count right away when connected
         stompClient.subscribe('/topic/userCount', function (userCountOutput) {
             const userCount = parseInt(userCountOutput.body, 10);
             updateUserCount(userCount);  // Update user count

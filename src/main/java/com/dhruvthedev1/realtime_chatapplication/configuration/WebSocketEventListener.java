@@ -29,13 +29,14 @@ public class WebSocketEventListener {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
         String username = (String) headerAccessor.getNativeHeader("username").get(0);
+        String sessionId = headerAccessor.getSessionId();  // gets session id
 
-        if (username != null) {
+        if (username != null && sessionId != null) {
             // Set username
             headerAccessor.getSessionAttributes().put("username", username);
-            log.info("User connected: {}", username);
+            log.info("User connected: {} with session ID: {}", username, sessionId);
 
-            onlineUsers.add(username);
+            onlineUsers.add(sessionId);
             sendActiveUserList();
 
             // Send join message
@@ -54,11 +55,13 @@ public class WebSocketEventListener {
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String username = (String) headerAccessor.getSessionAttributes().get("username");
+        String sessionId = headerAccessor.getSessionId(); 
 
-        if (username != null) {
-            log.info("User disconnected: {}", username);
 
-            onlineUsers.remove(username);
+        if (username != null && sessionId != null) {
+            log.info("User disconnected: {} with session ID {}", username);
+
+            onlineUsers.remove(sessionId);
             sendActiveUserList();
 
             // Send disconnect message
