@@ -1,8 +1,7 @@
 package com.dhruvthedev1.realtime_chatapplication.configuration;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -21,7 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class WebSocketEventListener {
     private final SimpMessageSendingOperations messagingTemplate;
-    private Set<String> onlineUsers = Collections.synchronizedSet(new HashSet<>()); // Stores active users
+    // sessionId, username
+    private Map<String, String> onlineUsers = new ConcurrentHashMap<>(); // Stores active users
 
     // When a user joins
     @EventListener
@@ -36,7 +36,7 @@ public class WebSocketEventListener {
             headerAccessor.getSessionAttributes().put("username", username);
             log.info("User connected: {} with session ID: {}", username, sessionId);
 
-            onlineUsers.add(sessionId);
+            onlineUsers.put(sessionId, username);
             sendActiveUserList();
 
             // Send join message
@@ -83,5 +83,9 @@ public class WebSocketEventListener {
 
     public int getOnlineUsersCount() {
         return onlineUsers.size();
+    }
+
+    public boolean isUsernameTaken(String username) {
+        return onlineUsers.containsValue(username);
     }
 }
