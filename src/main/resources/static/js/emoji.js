@@ -15,6 +15,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 },
             });
 
+            
+             
+            const buttonRect = emojiButton.getBoundingClientRect();
+
+            picker.style.position = "absolute";
+            picker.style.top = buttonRect.bottom + window.scrollY + "px";  
+            picker.style.left = buttonRect.right + window.scrollX - 200 + "px";
+
             document.body.appendChild(picker);
         }
     });
